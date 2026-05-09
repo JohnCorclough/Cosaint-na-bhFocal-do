@@ -36,6 +36,7 @@
       margin:0 auto;
     }
 
+  
     header{
       display:grid;
       gap:8px;
@@ -679,66 +680,86 @@
     ctx.fillText(shown,W()/2,y+h/2);
   }
 
-  let leftHeld = false;
-  let rightHeld = false;
+let leftHeld = false;
+let rightHeld = false;
 
-  function bindButton(id, fn){
-    document.getElementById(id).addEventListener("pointerdown", e => {
-      e.preventDefault();
-      fn();
-    });
-  }
-
-  bindButton("mascBtn", () => shoot("m"));
-  bindButton("femBtn", () => shoot("f"));
-  bindButton("pauseBtn", () => {
-    state.paused = !state.paused;
-    document.getElementById("pauseBtn").textContent = state.paused ? "Resume" : "Pause";
+function bindButton(id, fn){
+  document.getElementById(id).addEventListener("pointerdown", e => {
+    e.preventDefault();
+    fn();
   });
-  bindButton("restartBtn", resetGame);
-  bindButton("hintBtn", () => {
+}
+
+bindButton("mascBtn", () => shoot("m"));
+bindButton("femBtn", () => shoot("f"));
+
+bindButton("pauseBtn", () => {
+  state.paused = !state.paused;
+  document.getElementById("pauseBtn").textContent = state.paused ? "Resume" : "Pause";
+});
+
+bindButton("restartBtn", resetGame);
+
+bindButton("hintBtn", () => {
+  state.hints = !state.hints;
+  updateHUD();
+});
+
+function bindHold(id, set){
+  const el = document.getElementById(id);
+
+  el.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    set(true);
+  });
+
+  el.addEventListener("pointerup", e => {
+    e.preventDefault();
+    set(false);
+  });
+
+  el.addEventListener("pointercancel", e => {
+    e.preventDefault();
+    set(false);
+  });
+
+  el.addEventListener("pointerleave", e => {
+    e.preventDefault();
+    set(false);
+  });
+}
+
+bindHold("leftBtn", v => leftHeld = v);
+bindHold("rightBtn", v => rightHeld = v);
+
+addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+
+  if(k === "z") shoot("m");
+  if(k === "x") shoot("f");
+  if(k === "p") state.paused = !state.paused;
+  if(k === "r") resetGame();
+
+  if(k === "h"){
     state.hints = !state.hints;
     updateHUD();
-  });
-
-  function bindHold(id, set){
-    const el = document.getElementById(id);
-    el.addEventListener("pointerdown", e => { e.preventDefault(); set(true); });
-    el.addEventListener("pointerup", e => { e.preventDefault(); set(false); });
-    el.addEventListener("pointercancel", e => { e.preventDefault(); set(false); });
-    el.addEventListener("pointerleave", e => { e.preventDefault(); set(false); });
   }
+});
 
-  bindHold("leftBtn", v => leftHeld = v);
-  bindHold("rightBtn", v => rightHeld = v);
+canvas.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  canvas.setPointerCapture(e.pointerId);
+  movePlayerTo(e.clientX);
+});
 
-  addEventListener("keydown", e => {
-    const k = e.key.toLowerCase();
-    if(k === "z") shoot("m");
-    if(k === "x") shoot("f");
-    if(k === "p") state.paused = !state.paused;
-    if(k === "r") resetGame();
-    if(k === "h"){
-      state.hints = !state.hints;
-      updateHUD();
-    }
-  });
+canvas.addEventListener("pointermove", e => {
+  if(e.buttons) movePlayerTo(e.clientX);
+});
 
-  canvas.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    canvas.setPointerCapture(e.pointerId);
-    movePlayerTo(e.clientX);
-  });
-
-  canvas.addEventListener("pointermove", e => {
-    if(e.buttons) movePlayerTo(e.clientX);
-  });
-
-  function movePlayerTo(clientX){
-    const rect = canvas.getBoundingClientRect();
-    player.x = clientX - rect.left - player.w/2;
-  }
-
+function movePlayerTo(clientX){
+  const rect = canvas.getBoundingClientRect();
+  player.x = clientX - rect.left - player.w / 2;
+}
   function update(dt){
     if(state.paused || state.gameOver) return;
 
