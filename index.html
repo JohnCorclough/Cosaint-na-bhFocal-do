@@ -531,35 +531,49 @@
     updateHUD();
   }
 
-  function hit(inv, shot){
-    inv.hit = true;
+function hit(inv, shot){
+  inv.hit = true;
 
-    const correct = inv.gender === shot.gender;
-    const gText = inv.gender === "m" ? "masc" : "fem";
+  const correct = inv.gender === shot.gender;
+  const fullGender = inv.gender === "m" ? "masculine" : "feminine";
+  const shortGender = inv.gender === "m" ? "masc" : "fem";
+  const hintText = state.hints ? `\nExample: ${phrase(inv.word, inv.gender)}` : "";
 
-    if(correct){
-      state.streak++;
-      state.score += 10 + Math.min(30, state.streak);
+  if(correct){
+    state.streak++;
+    state.score += 10 + Math.min(30, state.streak);
 
-      if(state.hints){
-        showMessage(`✓ ${inv.word} (${gText}) — ${phrase(inv.word, inv.gender)}`, 1.45);
-      }else{
-        showMessage(`✓ ${inv.word} (${gText})`, 1.0);
-      }
-    }else{
-      state.score = Math.max(0, state.score - 10);
-      damage(state.hints ? `✗ ${inv.word} is ${gText} — ${phrase(inv.word, inv.gender)}` : `✗ ${inv.word} is ${gText}`);
+    showMessage(
+      `Correct!\n${inv.word} is ${fullGender}${hintText}`,
+      2.2
+    );
+  }else{
+    state.streak = 0;
+    state.score = Math.max(0, state.score - 10);
+    state.lives--;
+
+    showMessage(
+      `Wrong gender!\n${inv.word} is ${fullGender}${hintText}`,
+      2.6
+    );
+
+    if(state.lives <= 0){
+      state.gameOver = true;
+      showMessage(
+        `Game Over\n${inv.word} was ${shortGender}`,
+        999
+      );
     }
-
-    const newLevel = 1 + Math.floor(state.score / 240);
-
-    if(newLevel !== state.level){
-      state.level = newLevel;
-      showMessage(`Level ${state.level}`, .9);
-    }
-
-    updateHUD();
   }
+
+  const newLevel = 1 + Math.floor(state.score / 240);
+
+  if(newLevel !== state.level){
+    state.level = newLevel;
+  }
+
+  updateHUD();
+}
 
   function drawBackground(dt){
     state.wave += dt * .75;
@@ -707,30 +721,68 @@
     ctx.fill();
   }
 
-  function drawMessage(){
-    if(state.time > state.messageUntil) return;
+function drawMessage(){
+  if(state.time > state.messageUntil) return;
 
-    const text = state.message;
+  const lines = String(state.message).split("\n");
 
-    ctx.font = isMobile() ? "14px system-ui" : "16px system-ui";
-    const w = Math.min(W()-18, ctx.measureText(text).width + 30);
-    const h = 38;
-    const x = W()/2 - w/2;
-    const y = 16;
+  ctx.save();
 
-    ctx.fillStyle = "rgba(0,0,0,.45)";
-    ctx.strokeStyle = "rgba(255,255,255,.18)";
-    roundRect(x,y,w,h,10);
-    ctx.fill();
-    ctx.stroke();
+  const panelW = Math.min(W() - 20, isMobile() ? W() - 16 : 560);
+  const panelX = W()/2 - panelW/2;
+  const panelY = 16;
 
-    ctx.fillStyle = "#edf5ff";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+  const titleSize = isMobile() ? 18 : 22;
+  const bodySize = isMobile() ? 15 : 18;
+  const lineGap = isMobile() ? 24 : 29;
+  const paddingTop = isMobile() ? 14 : 17;
+  const paddingBottom = isMobile() ? 14 : 17;
 
-    const shown = text.length > 48 && isMobile() ? text.slice(0,46) + "…" : text;
-    ctx.fillText(shown,W()/2,y+h/2);
+  const panelH = paddingTop + paddingBottom + titleSize + Math.max(0, lines.length - 1) * lineGap;
+
+  ctx.fillStyle = "rgba(0,0,0,.72)";
+  ctx.strokeStyle = "rgba(255,255,255,.30)";
+  ctx.lineWidth = 2;
+
+  roundRect(panelX, panelY, panelW, panelH, 16);
+  ctx.fill();
+  ctx.stroke();
+
+  // subtle inner glow
+  ctx.strokeStyle = "rgba(180,220,255,.18)";
+  ctx.lineWidth = 1;
+  roundRect(panelX + 4, panelY + 4, panelW - 8, panelH - 8, 13);
+  ctx.stroke();
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  // First line: main result
+  ctx.font = `800 ${titleSize}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(lines[0], W()/2, panelY + paddingTop + titleSize/2);
+
+  // Remaining lines: explanation / example
+  ctx.font = `650 ${bodySize}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
+  ctx.fillStyle = "#dceaff";
+
+  for(let i = 1; i < lines.length; i++){
+    let text = lines[i];
+
+    // avoid overflow on phones
+    if(isMobile() && text.length > 44){
+      text = text.slice(0, 42) + "…";
+    }
+
+    ctx.fillText(
+      text,
+      W()/2,
+      panelY + paddingTop + titleSize + i * lineGap
+    );
   }
+
+  ctx.restore();
+}
 
   // ============================================================
   // BUTTON CONTROLS
