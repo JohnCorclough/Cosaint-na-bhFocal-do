@@ -683,54 +683,38 @@
 let leftHeld = false;
 let rightHeld = false;
 
-function bindButton(id, fn){
-  document.getElementById(id).addEventListener("pointerdown", e => {
-    e.preventDefault();
-    fn();
-  });
+function movePlayerBy(amount){
+  player.x += amount;
+  player.x = Math.max(10, Math.min(W() - player.w - 10, player.x));
 }
 
-bindButton("mascBtn", () => shoot("m"));
-bindButton("femBtn", () => shoot("f"));
-
-bindButton("pauseBtn", () => {
-  state.paused = !state.paused;
-  document.getElementById("pauseBtn").textContent = state.paused ? "Resume" : "Pause";
-});
-
-bindButton("restartBtn", resetGame);
-
-bindButton("hintBtn", () => {
-  state.hints = !state.hints;
-  updateHUD();
-});
-
-function bindHold(id, set){
+function bindMoveButton(id, direction){
   const el = document.getElementById(id);
 
   el.addEventListener("pointerdown", e => {
     e.preventDefault();
-    set(true);
+    if(direction === "left") leftHeld = true;
+    if(direction === "right") rightHeld = true;
+
+    // immediate tap movement
+    movePlayerBy(direction === "left" ? -45 : 45);
   });
 
   el.addEventListener("pointerup", e => {
     e.preventDefault();
-    set(false);
+    if(direction === "left") leftHeld = false;
+    if(direction === "right") rightHeld = false;
   });
 
   el.addEventListener("pointercancel", e => {
     e.preventDefault();
-    set(false);
-  });
-
-  el.addEventListener("pointerleave", e => {
-    e.preventDefault();
-    set(false);
+    if(direction === "left") leftHeld = false;
+    if(direction === "right") rightHeld = false;
   });
 }
 
-bindHold("leftBtn", v => leftHeld = v);
-bindHold("rightBtn", v => rightHeld = v);
+bindMoveButton("leftBtn", "left");
+bindMoveButton("rightBtn", "right");
 
 addEventListener("keydown", e => {
   const k = e.key.toLowerCase();
