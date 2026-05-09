@@ -721,6 +721,10 @@ addEventListener("keydown", e => {
 
   if(k === "z") shoot("m");
   if(k === "x") shoot("f");
+
+  if(e.key === "ArrowLeft") leftHeld = true;
+  if(e.key === "ArrowRight") rightHeld = true;
+
   if(k === "p") state.paused = !state.paused;
   if(k === "r") resetGame();
 
@@ -728,6 +732,11 @@ addEventListener("keydown", e => {
     state.hints = !state.hints;
     updateHUD();
   }
+});
+
+addEventListener("keyup", e => {
+  if(e.key === "ArrowLeft") leftHeld = false;
+  if(e.key === "ArrowRight") rightHeld = false;
 });
 
 canvas.addEventListener("pointerdown", e => {
