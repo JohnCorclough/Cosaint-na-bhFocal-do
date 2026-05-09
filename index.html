@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosaint na bhFocal</title>
+
+  <style>
+    :root{
+      color-scheme: dark;
+      --bg:#071019;
+      --panel:#111a27;
+      --panel2:#172234;
+      --text:#eaf2ff;
+      --muted:#b9c6dc;
+      --line:rgba(255,255,255,.14);
+      --blue:rgba(115,180,255,.22);
+      --pink:rgba(255,145,220,.20);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top, rgba(45,90,130,.35), transparent 38%),
+        linear-gradient(#071019,#04080f);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      padding:10px;
+    }
+
+    .app{
+      max-width:1050px;
+      margin:0 auto;
+    }
+
+    header{
+      display:grid;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    .topbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .title{
+      font-size:clamp(18px,4vw,28px);
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .stats{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+
+    .pill{
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .setup{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px;
+    }
+
+    label{
+      font-size:13px;
+      color:var(--muted);
+      margin-right:5px;
+    }
+
+    select{
+      background:#0b1320;
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:9px 10px;
+      font-size:14px;
+      max-width:100%;
+    }
+
+    .gameWrap{
+      position:relative;
+    }
+
+    canvas{
+      display:block;
+      width:100%;
+      height:auto;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#071019;
+      box-shadow:0 12px 40px rgba(0,0,0,.45);
+      touch-action:none;
+    }
+
+    .controls{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:9px;
+    }
+
+    .minorControls{
+      margin-top:9px;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:9px;
+    }
+
+    button{
+      border:1px solid var(--line);
+      border-radius:15px;
+      padding:14px 10px;
+      color:var(--text);
+      background:rgba(255,255,255,.08);
+      font-size:16px;
+      font-weight:750;
+      min-height:52px;
+    }
+
+    button:active{
+      transform:translateY(1px);
+      filter:brightness(1.15);
+    }
+
+    #mascBtn{ background:var(--blue); }
+    #femBtn{ background:var(--pink); }
+
+    .help{
+      margin-top:9px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .kbd{
+      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+      background:rgba(255,255,255,.1);
+      border:1px solid var(--line);
+      padding:1px 6px;
+      border-radius:6px;
+      color:var(--text);
+    }
+
+    @media (min-width:800px){
+      header{
+        grid-template-columns:1fr;
+      }
+
+      .controls{
+        grid-template-columns:1.2fr 1.2fr 1fr 1fr;
+      }
+    }
+
+    @media (max-width:520px){
+      body{ padding:7px; }
+      .pill{ font-size:12px; padding:5px 8px; }
+      button{ font-size:15px; min-height:48px; padding:11px 8px; }
+      .minorControls{ grid-template-columns:1fr 1fr 1fr; }
+      .help{ font-size:12px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="topbar">
+        <div class="title">Cosaint na bhFocal</div>
+        <div class="stats">
+          <div class="pill">Score: <b id="score">0</b></div>
+          <div class="pill">Streak: <b id="streak">0</b></div>
+          <div class="pill">Lives: <b id="lives">3</b></div>
+          <div class="pill">Level: <b id="level">1</b></div>
+        </div>
+      </div>
+
+      <div class="setup">
+        <div>
+          <label for="categorySelect">Word category</label>
+          <select id="categorySelect">
+            <option value="all">All categories</option>
+            <option value="coast">Coast / Sea</option>
+            <option value="country">Countryside / Farming</option>
+            <option value="home">Home / Community</option>
+            <option value="town">Town / Services</option>
+            <option value="culture">Sport / Culture</option>
+            <option value="weather">Weather / Nature</option>
+          </select>
+        </div>
+        <div class="pill">Bank: <b id="bankCount">0</b> words</div>
+        <div class="pill">Keys: <b>Z</b> masc · <b>X</b> fem</div>
+      </div>
+    </header>
+
+    <div class="gameWrap">
+      <canvas id="game" width="1000" height="650"></canvas>
+    </div>
+
+    <div class="controls">
+      <button id="mascBtn">Masculine (Z)</button>
+      <button id="femBtn">Feminine (X)</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="hintBtn">Hints: On</button>
+    </div>
+
+    <div class="minorControls">
+      <button id="restartBtn">Restart</button>
+      <button id="leftBtn">◀ Move</button>
+      <button id="rightBtn">Move ▶</button>
+    </div>
+
+    <div class="help">
+      Choose a category, then shoot the noun with its grammatical gender.
+      Bubbles are deliberately neutral, so they do not give the answer away.
+      On a keyboard use <span class="kbd">Z</span> for masculine and <span class="kbd">X</span> for feminine.
+      On a phone, use the touch buttons or drag the ship left and right.
+    </div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  const WORD_BANKS = {
+    coast: [
+      ["bád","m"],["iasc","m"],["cladach","m"],["calafort","m"],["cuan","m"],["port","m"],["bá","f"],["trá","f"],
+      ["tonn","f"],["taoide","f"],["farraige","f"],["muir","f"],["oileán","m"],["carraig","f"],["cloch","f"],["gaineamh","m"],
+      ["salann","m"],["ceilp","f"],["feamainn","f"],["sliogán","m"],["portán","m"],["gliomach","m"],["ron","m"],["deilf","f"],
+      ["aill","f"],["ceann tíre","m"],["tigh solais","m"],["crúca","m"],["líon","m"],["iascaire","m"],["bádóir","m"],
+      ["curach","m"],["seol","m"],["ramha","m"],["duga","m"],["cúr","m"],["sprae","m"],["uisce","m"],["sruth","m"],
+      ["ceo mara","m"],["bád tarrthála","m"],["bád farantóireachta","m"],["cósta","m"],["cuan beag","m"],["trá mhór","f"]
+    ],
+    country: [
+      ["cnoc","m"],["sliabh","m"],["gleann","m"],["machaire","m"],["páirc","f"],["móin","f"],["portach","m"],["talamh","m"],
+      ["féar","m"],["fómhar","m"],["earrach","m"],["geimhreadh","m"],["samhradh","m"],["abhainn","f"],["loch","m"],["tobar","m"],
+      ["droichead","m"],["bóthar","m"],["slí","f"],["cosán","m"],["crann","m"],["coill","f"],["duilleog","f"],["bláth","m"],
+      ["fréamh","f"],["síol","m"],["claí","m"],["geata","m"],["fál","m"],["tua","f"],["sluasaid","f"],["spád","m"],
+      ["tarracóir","m"],["feirm","f"],["feirmeoir","m"],["tréad","m"],["bó","f"],["lao","m"],["caora","f"],["uan","m"],
+      ["capall","m"],["asal","m"],["muc","f"],["cearc","f"],["coileach","m"],["sicín","m"],["madra","m"],["cat","m"],
+      ["éan","m"],["préachán","m"],["fia","m"],["giorria","m"],["sionnach","m"],["sceach","f"],["fraoch","m"],["lochán","m"]
+    ],
+    home: [
+      ["teach","m"],["baile","m"],["seomra","m"],["cistin","f"],["seomra suí","m"],["doras","m"],["fuinneog","f"],["balla","m"],
+      ["urlár","m"],["díon","m"],["simléar","m"],["staighre","m"],["dorchla","m"],["leaba","f"],["bord","m"],["cathaoir","f"],
+      ["tolg","m"],["lampa","m"],["eochair","f"],["glas","m"],["bosca","m"],["mála","m"],["póca","m"],["cóta","m"],
+      ["bróg","f"],["stoca","m"],["hata","m"],["léine","f"],["geansaí","m"],["cupán","m"],["pláta","m"],["babhla","m"],
+      ["scian","f"],["forc","f"],["spúnóg","f"],["pota","m"],["panna","m"],["arán","m"],["im","m"],["bainne","m"],
+      ["tae","m"],["caife","m"],["siúcra","m"],["piobar","m"],["uisce","m"],["gloine","f"],["buicéad","m"],["teilifís","f"],
+      ["ríomhaire","m"],["fón póca","m"],["peann","m"],["páipéar","m"],["leabhar","m"],["nóta","m"],["gairdín","m"],["clós","m"],
+      ["comharsa","m"],["cara","m"],["teaghlach","m"],["páiste","m"],["bean","f"],["fear","m"],["cuairt","f"],["cruinniú","m"]
+    ],
+    town: [
+      ["sráid","f"],["siopa","m"],["margadh","m"],["oifig","f"],["óstán","m"],["bialann","f"],["banc","m"],["leabharlann","f"],
+      ["scoil","f"],["coláiste","m"],["ollscoil","f"],["séipéal","m"],["paróiste","f"],["ospidéal","m"],["cógaslann","f"],
+      ["búistéir","m"],["bácús","m"],["post","f"],["oifig an phoist","f"],["stáisiún","m"],["bus","m"],["carr","m"],["tacsaí","m"],
+      ["rothar","m"],["crosbhóthar","m"],["coirnéal","m"],["comhartha","m"],["soilse tráchta","f"],["páirc","f"],["ionad","m"],
+      ["ionad pobail","m"],["club","m"],["cumann","m"],["cúirt","f"],["Garda","m"],["dochtúir","m"],["banaltra","f"],["fiaclóir","m"],
+      ["múinteoir","m"],["dalta","m"],["bainisteoir","m"],["oibrí","m"],["obair","f"],["pá","m"],["cíos","m"],["ticéad","m"],
+      ["uimhir","f"],["seoladh","m"],["cathair","f"],["sráidbhaile","m"],["contae","m"],["halla","m"],["comhairle","f"]
+    ],
+    culture: [
+      ["cluiche","m"],["liathróid","f"],["foireann","f"],["iománaíocht","f"],["camán","m"],["peil","f"],["réiteoir","m"],
+      ["imreoir","m"],["cúl","m"],["pointe","m"],["traenáil","f"],["corn","m"],["bua","m"],["caillteanas","m"],["ceol","m"],
+      ["amhrán","m"],["damhsa","m"],["fidil","f"],["feadóg","f"],["bosca ceoil","m"],["giotár","m"],["druma","m"],
+      ["ceoltóir","m"],["seisiún","m"],["comórtas","m"],["féile","f"],["scéal","m"],["nuacht","f"],["clár","m"],["dráma","m"],
+      ["comhrá","m"],["caint","f"],["focal","m"],["abairt","f"],["ceist","f"],["freagra","m"],["spraoi","m"],["siúlóid","f"],
+      ["rith","m"],["snámh","m"],["léacht","f"],["rang","m"],["ceacht","m"],["scrúdú","m"],["nós","m"],["traidisiún","m"]
+    ],
+    weather: [
+      ["aimsir","f"],["báisteach","f"],["ceo","m"],["gaoth","f"],["stoirm","f"],["tintreach","f"],["toirneach","m"],
+      ["scamall","m"],["grian","f"],["gréin","f"],["gealach","f"],["réalta","f"],["spéir","f"],["oíche","f"],["lá","m"],
+      ["maidin","f"],["tráthnóna","m"],["seachtain","f"],["mí","m"],["bliain","f"],["sioc","m"],["sneachta","m"],["teas","m"],
+      ["dúiche","f"],["tír","f"],["ceantar","m"],["aill","f"],["fraoch","m"],["bláth","m"],["crann","m"],["coill","f"],
+      ["abhainn","f"],["loch","m"],["farraige","f"],["móin","f"],["portach","m"],["solas","m"],["dorchadas","m"],["scáth","m"]
+    ]
+  };
+
+  const CATEGORIES = Object.keys(WORD_BANKS);
+
+  function getBank(category){
+    if(category === "all"){
+      return CATEGORIES.flatMap(c => WORD_BANKS[c]);
+    }
+    return WORD_BANKS[category] || WORD_BANKS.home;
+  }
+
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  const ui = {
+    score: document.getElementById("score"),
+    streak: document.getElementById("streak"),
+    lives: document.getElementById("lives"),
+    level: document.getElementById("level"),
+    bankCount: document.getElementById("bankCount"),
+    category: document.getElementById("categorySelect"),
+    hintBtn: document.getElementById("hintBtn")
+  };
+
+  const state = {
+    score:0,
+    streak:0,
+    lives:3,
+    level:1,
+    paused:false,
+    gameOver:false,
+    hints:true,
+    category:"all",
+    bank:getBank("all"),
+    invaders:[],
+    shots:[],
+    nextSpawn:0,
+    time:0,
+    message:"Z = masculine, X = feminine",
+    messageUntil:2.5,
+    wave:0
+  };
+
+  const player = { x:500, y:580, w:108, h:20 };
+
+  const isMobile = () => innerWidth < 600;
+
+  const config = {
+    maxInvaders(){ return isMobile() ? 5 : 9; },
+    bubbleRadius(){ return isMobile() ? 13 : 16; },
+    bubblePad(){ return isMobile() ? 8 : 10; },
+    wordFont(){ return isMobile() ? 14 : 16; },
+    fallSpeed(){ return 12 + state.level * 1.7; },
+    spawnDelay(){
+      const base = Math.max(1.35, 2.4 - state.level * 0.12);
+      const crowd = state.invaders.length / this.maxInvaders();
+      return base + Math.max(0, crowd - 0.55) * 2.2;
+    }
+  };
+
+  function resize(){
+    const ratio = devicePixelRatio || 1;
+    const cssW = canvas.clientWidth;
+    const cssH = cssW * 0.65;
+    canvas.width = Math.round(cssW * ratio);
+    canvas.height = Math.round(cssH * ratio);
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+  }
+
+  function W(){ return canvas.clientWidth; }
+  function H(){ return canvas.clientHeight; }
+
+  addEventListener("resize", resize);
+  requestAnimationFrame(resize);
+
+  function updateHUD(){
+    ui.score.textContent = state.score;
+    ui.streak.textContent = state.streak;
+    ui.lives.textContent = state.lives;
+    ui.level.textContent = state.level;
+    ui.bankCount.textContent = state.bank.length;
+    ui.hintBtn.textContent = state.hints ? "Hints: On" : "Hints: Off";
+  }
+
+  function showMessage(text, duration=1.25){
+    state.message = text;
+    state.messageUntil = state.time + duration;
+  }
+
+  function resetGame(){
+    state.score = 0;
+    state.streak = 0;
+    state.lives = 3;
+    state.level = 1;
+    state.paused = false;
+    state.gameOver = false;
+    state.invaders = [];
+    state.shots = [];
+    state.nextSpawn = 0.8;
+    state.time = 0;
+    showMessage("Z = masculine, X = feminine", 2.4);
+    updateHUD();
+  }
+
+  function setCategory(cat){
+    state.category = cat;
+    state.bank = getBank(cat);
+    state.invaders = [];
+    state.shots = [];
+    state.nextSpawn = state.time + 0.6;
+    showMessage("Category changed", 1);
+    updateHUD();
+  }
+
+  ui.category.addEventListener("change", e => setCategory(e.target.value));
+
+  function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function lenite(word){
+    if(!word) return word;
+    const first = word[0].toLowerCase();
+    if(word[1] && word[1].toLowerCase() === "h") return word;
+    return "bcdfgmpt".includes(first) ? word[0] + "h" + word.slice(1) : word;
+  }
+
+  function phrase(word, gender){
+    const adj = rand(["mór","beag","fuar","fliuch","garbh","ciúin"]);
+    return gender === "f" ? `${word} ${lenite(adj)}` : `${word} ${adj}`;
+  }
+
+  function spawnX(){
+    const r = config.bubbleRadius() + config.bubblePad();
+    const min = r + 12;
+    const max = W() - r - 12;
+
+    for(let tries=0; tries<12; tries++){
+      const x = min + Math.random()*(max-min);
+      let clear = true;
+      for(const inv of state.invaders){
+        if(inv.y > 130) continue;
+        const dx = inv.x - x;
+        const dy = inv.y + 24;
+        if(dx*dx + dy*dy < (r*2.4)*(r*2.4)){
+          clear = false;
+          break;
+        }
+      }
+      if(clear) return x;
+    }
+    return min + Math.random()*(max-min);
+  }
+
+  function spawn(){
+    if(state.invaders.length >= config.maxInvaders()) return;
+    const item = rand(state.bank);
+    const r = config.bubbleRadius();
+
+    state.invaders.push({
+      word:item[0],
+      gender:item[1],
+      x:spawnX(),
+      y:-30,
+      r,
+      speed:config.fallSpeed(),
+      hit:false
+    });
+  }
+
+  function shoot(gender){
+    if(state.paused || state.gameOver) return;
+    state.shots.push({
+      x:player.x + player.w/2,
+      y:player.y - 6,
+      r:6,
+      speed:560,
+      gender
+    });
+  }
+
+  function damage(text){
+    state.streak = 0;
+    state.lives--;
+    showMessage(text, 1.0);
+    if(state.lives <= 0){
+      state.gameOver = true;
+      showMessage("Game Over — press Restart", 999);
+    }
+    updateHUD();
+  }
+
+  function hit(inv, shot){
+    inv.hit = true;
+    const correct = inv.gender === shot.gender;
+    const gText = inv.gender === "m" ? "masc" : "fem";
+
+    if(correct){
+      state.streak++;
+      state.score += 10 + Math.min(30, state.streak);
+      if(state.hints){
+        showMessage(`✓ ${inv.word} (${gText}) — ${phrase(inv.word, inv.gender)}`, 1.45);
+      }else{
+        showMessage(`✓ ${inv.word} (${gText})`, 1.0);
+      }
+    }else{
+      state.score = Math.max(0, state.score - 10);
+      damage(state.hints ? `✗ ${inv.word} is ${gText} — ${phrase(inv.word, inv.gender)}` : `✗ ${inv.word} is ${gText}`);
+    }
+
+    const newLevel = 1 + Math.floor(state.score / 240);
+    if(newLevel !== state.level){
+      state.level = newLevel;
+      showMessage(`Level ${state.level}`, .9);
+    }
+
+    updateHUD();
+  }
+
+  function drawBackground(dt){
+    state.wave += dt * .75;
+
+    const w = W(), h = H();
+    const horizon = h * .48;
+
+    const sky = ctx.createLinearGradient(0,0,0,horizon);
+    sky.addColorStop(0,"#07101d");
+    sky.addColorStop(1,"#12243b");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0,0,w,horizon);
+
+    const sea = ctx.createLinearGradient(0,horizon,0,h);
+    sea.addColorStop(0,"#0d3147");
+    sea.addColorStop(1,"#06131f");
+    ctx.fillStyle = sea;
+    ctx.fillRect(0,horizon,w,h-horizon);
+
+    ctx.strokeStyle = "rgba(180,220,255,.20)";
+    ctx.lineWidth = 1;
+    for(let i=0;i<8;i++){
+      const y = horizon + 18 + i*30;
+      ctx.beginPath();
+      for(let x=0;x<=w;x+=22){
+        ctx.lineTo(x, y + Math.sin(x/85 + state.wave + i*.6) * 2.5);
+      }
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = "rgba(12,24,24,.58)";
+    ctx.beginPath();
+    ctx.moveTo(0,horizon);
+    ctx.quadraticCurveTo(w*.20,horizon-60,w*.40,horizon-8);
+    ctx.quadraticCurveTo(w*.58,horizon+22,w*.75,horizon-28);
+    ctx.quadraticCurveTo(w*.90,horizon-72,w,horizon-12);
+    ctx.lineTo(w,horizon+60);
+    ctx.lineTo(0,horizon+60);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(5,9,12,.88)";
+    ctx.beginPath();
+    ctx.moveTo(0,horizon+46);
+    ctx.lineTo(w*.20,horizon+25);
+    ctx.lineTo(w*.34,horizon+42);
+    ctx.lineTo(w*.48,horizon+26);
+    ctx.lineTo(w*.64,horizon+48);
+    ctx.lineTo(w*.80,horizon+30);
+    ctx.lineTo(w,horizon+45);
+    ctx.lineTo(w,h);
+    ctx.lineTo(0,h);
+    ctx.closePath();
+    ctx.fill();
+
+    const lx = w*.87, ly = horizon+32;
+    ctx.fillStyle = "rgba(8,8,10,.95)";
+    ctx.beginPath();
+    ctx.moveTo(lx-10,ly);
+    ctx.lineTo(lx+10,ly);
+    ctx.lineTo(lx+6,ly-52);
+    ctx.lineTo(lx-6,ly-52);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillRect(lx-9,ly-60,18,9);
+
+    ctx.fillStyle = "rgba(255,240,180,.12)";
+    ctx.beginPath();
+    ctx.arc(lx,ly-55,18,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function drawBubble(inv){
+    const pad = config.bubblePad();
+
+    ctx.save();
+    ctx.translate(inv.x, inv.y);
+
+    ctx.beginPath();
+    ctx.arc(0,0,inv.r+pad,0,Math.PI*2);
+    ctx.fillStyle = "rgba(235,245,255,.105)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(235,245,255,.28)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.font = `${config.wordFont()}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgba(248,251,255,.96)";
+
+    const maxWidth = isMobile() ? 92 : 135;
+    ctx.fillText(inv.word,0,0,maxWidth);
+
+    ctx.restore();
+  }
+
+  function drawPlayer(){
+    player.y = H() - 58;
+    player.x = Math.max(10, Math.min(W()-player.w-10, player.x));
+
+    ctx.save();
+    ctx.translate(player.x, player.y);
+
+    ctx.fillStyle = "rgba(255,255,255,.18)";
+    ctx.fillRect(0,0,player.w,20);
+
+    ctx.fillStyle = "rgba(115,180,255,.45)";
+    ctx.fillRect(10,-14,38,14);
+
+    ctx.fillStyle = "rgba(255,145,220,.42)";
+    ctx.fillRect(60,-14,38,14);
+
+    ctx.font = "12px ui-monospace,Consolas,monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#eaf2ff";
+    ctx.fillText("Z",29,-7);
+    ctx.fillText("X",79,-7);
+
+    ctx.restore();
+  }
+
+  function drawShot(s){
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle = s.gender === "m" ? "rgba(115,180,255,.95)" : "rgba(255,145,220,.95)";
+    ctx.fill();
+  }
+
+  function drawMessage(){
+    if(state.time > state.messageUntil) return;
+
+    const text = state.message;
+    const w = Math.min(W()-18, ctx.measureText(text).width + 30);
+    const h = 38;
+    const x = W()/2 - w/2;
+    const y = 16;
+
+    ctx.font = isMobile() ? "14px system-ui" : "16px system-ui";
+    ctx.fillStyle = "rgba(0,0,0,.45)";
+    ctx.strokeStyle = "rgba(255,255,255,.18)";
+    roundRect(x,y,w,h,10);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#edf5ff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const shown = text.length > 48 && isMobile() ? text.slice(0,46) + "…" : text;
+    ctx.fillText(shown,W()/2,y+h/2);
+  }
+
+  let leftHeld = false;
+  let rightHeld = false;
+
+  function bindButton(id, fn){
+    document.getElementById(id).addEventListener("pointerdown", e => {
+      e.preventDefault();
+      fn();
+    });
+  }
+
+  bindButton("mascBtn", () => shoot("m"));
+  bindButton("femBtn", () => shoot("f"));
+  bindButton("pauseBtn", () => {
+    state.paused = !state.paused;
+    document.getElementById("pauseBtn").textContent = state.paused ? "Resume" : "Pause";
+  });
+  bindButton("restartBtn", resetGame);
+  bindButton("hintBtn", () => {
+    state.hints = !state.hints;
+    updateHUD();
+  });
+
+  function bindHold(id, set){
+    const el = document.getElementById(id);
+    el.addEventListener("pointerdown", e => { e.preventDefault(); set(true); });
+    el.addEventListener("pointerup", e => { e.preventDefault(); set(false); });
+    el.addEventListener("pointercancel", e => { e.preventDefault(); set(false); });
+    el.addEventListener("pointerleave", e => { e.preventDefault(); set(false); });
+  }
+
+  bindHold("leftBtn", v => leftHeld = v);
+  bindHold("rightBtn", v => rightHeld = v);
+
+  addEventListener("keydown", e => {
+    const k = e.key.toLowerCase();
+    if(k === "z") shoot("m");
+    if(k === "x") shoot("f");
+    if(k === "p") state.paused = !state.paused;
+    if(k === "r") resetGame();
+    if(k === "h"){
+      state.hints = !state.hints;
+      updateHUD();
+    }
+  });
+
+  canvas.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    canvas.setPointerCapture(e.pointerId);
+    movePlayerTo(e.clientX);
+  });
+
+  canvas.addEventListener("pointermove", e => {
+    if(e.buttons) movePlayerTo(e.clientX);
+  });
+
+  function movePlayerTo(clientX){
+    const rect = canvas.getBoundingClientRect();
+    player.x = clientX - rect.left - player.w/2;
+  }
+
+  function update(dt){
+    if(state.paused || state.gameOver) return;
+
+    state.time += dt;
+
+    if(leftHeld) player.x -= 340 * dt;
+    if(rightHeld) player.x += 340 * dt;
+
+    if(state.time >= state.nextSpawn){
+      if(state.invaders.length < config.maxInvaders()){
+        spawn();
+      }
+      state.nextSpawn = state.time + config.spawnDelay() * (0.85 + Math.random()*0.35);
+    }
+
+    for(const inv of state.invaders){
+      inv.y += inv.speed * dt;
+    }
+
+    for(const shot of state.shots){
+      shot.y -= shot.speed * dt;
+    }
+
+    for(const inv of state.invaders){
+      if(inv.hit) continue;
+      for(const shot of state.shots){
+        if(shot.dead) continue;
+        const rr = inv.r + config.bubblePad() + shot.r;
+        const dx = inv.x - shot.x;
+        const dy = inv.y - shot.y;
+        if(dx*dx + dy*dy <= rr*rr){
+          shot.dead = true;
+          hit(inv,shot);
+          break;
+        }
+      }
+    }
+
+    for(const inv of state.invaders){
+      if(!inv.hit && inv.y > H() - 36){
+        inv.hit = true;
+        damage(`Missed: ${inv.word}`);
+      }
+    }
+
+    state.invaders = state.invaders.filter(i => !i.hit && i.y < H()+70);
+    state.shots = state.shots.filter(s => !s.dead && s.y > -70);
+  }
+
+  function draw(dt){
+    ctx.clearRect(0,0,W(),H());
+    drawBackground(dt);
+
+    ctx.strokeStyle = "rgba(255,255,255,.2)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0,H()-26);
+    ctx.lineTo(W(),H()-26);
+    ctx.stroke();
+
+    for(const inv of state.invaders) drawBubble(inv);
+    for(const shot of state.shots) drawShot(shot);
+    drawPlayer();
+    drawMessage();
+
+    if(state.paused || state.gameOver){
+      ctx.fillStyle = "rgba(0,0,0,.40)";
+      ctx.fillRect(0,0,W(),H());
+      ctx.fillStyle = "#edf5ff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "26px system-ui";
+      ctx.fillText(state.gameOver ? "Game Over" : "Paused", W()/2, H()/2 - 10);
+      ctx.font = "15px system-ui";
+      ctx.fillText(state.gameOver ? "Tap Restart" : "Tap Pause to resume", W()/2, H()/2 + 24);
+    }
+  }
+
+  let last = performance.now();
+
+  function loop(now){
+    const dt = Math.min(0.033, (now-last)/1000);
+    last = now;
+    update(dt);
+    draw(dt);
+    requestAnimationFrame(loop);
+  }
+
+  setCategory("all");
+  resetGame();
+  updateHUD();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
