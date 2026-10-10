@@ -1,248 +1,28 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cosaint na bhFocal</title>
-
-  <style>
-    :root{
-      color-scheme: dark;
-      --bg:#071019;
-      --panel:#111a27;
-      --panel2:#172234;
-      --text:#eaf2ff;
-      --muted:#b9c6dc;
-      --line:rgba(255,255,255,.14);
-      --blue:rgba(115,180,255,.22);
-      --pink:rgba(255,145,220,.20);
-    }
-
-    *{ box-sizing:border-box; }
-
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at top, rgba(45,90,130,.35), transparent 38%),
-        linear-gradient(#071019,#04080f);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      padding:10px;
-    }
-
-    .app{
-      max-width:1050px;
-      margin:0 auto;
-    }
-
-    header{
-      display:grid;
-      gap:8px;
-      margin-bottom:8px;
-    }
-
-    .topbar{
-      display:flex;
-      flex-wrap:wrap;
-      gap:7px;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    .title{
-      font-size:clamp(18px,4vw,28px);
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-
-    .stats{
-      display:flex;
-      flex-wrap:wrap;
-      gap:7px;
-    }
-
-    .pill{
-      background:rgba(255,255,255,.08);
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:13px;
-      white-space:nowrap;
-    }
-
-    .setup{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-      justify-content:space-between;
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:8px;
-    }
-
-    label{
-      font-size:13px;
-      color:var(--muted);
-      margin-right:5px;
-    }
-
-    select{
-      background:#0b1320;
-      color:var(--text);
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:9px 10px;
-      font-size:14px;
-      max-width:100%;
-    }
-
-    canvas{
-      display:block;
-      width:100%;
-      height:auto;
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:#071019;
-      box-shadow:0 12px 40px rgba(0,0,0,.45);
-      touch-action:none;
-    }
-
-    .controls{
-      margin-top:10px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:9px;
-    }
-
-    .minorControls{
-      margin-top:9px;
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:9px;
-    }
-
-    button{
-      border:1px solid var(--line);
-      border-radius:15px;
-      padding:14px 10px;
-      color:var(--text);
-      background:rgba(255,255,255,.08);
-      font-size:16px;
-      font-weight:750;
-      min-height:52px;
-      cursor:pointer;
-    }
-
-    button:active{
-      transform:translateY(1px);
-      filter:brightness(1.15);
-    }
-
-    #mascBtn{ background:var(--blue); }
-    #femBtn{ background:var(--pink); }
-
-    .help{
-      margin-top:9px;
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 12px;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-    }
-
-    .kbd{
-      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
-      background:rgba(255,255,255,.1);
-      border:1px solid var(--line);
-      padding:1px 6px;
-      border-radius:6px;
-      color:var(--text);
-    }
-
-    @media (min-width:800px){
-      .controls{
-        grid-template-columns:1fr 1fr 1fr 1fr;
-      }
-    }
-
-    @media (max-width:520px){
-      body{ padding:7px; }
-      .pill{ font-size:12px; padding:5px 8px; }
-      button{ font-size:15px; min-height:48px; padding:11px 8px; }
-      .help{ font-size:12px; }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="app">
-    <header>
-      <div class="topbar">
-        <div class="title">Cosaint na bhFocal</div>
-        <div class="stats">
-          <div class="pill">Score: <b id="score">0</b></div>
-          <div class="pill">Streak: <b id="streak">0</b></div>
-          <div class="pill">Lives: <b id="lives">5</b></div>
-          <div class="pill">Level: <b id="level">1</b></div>
-        </div>
-      </div>
-
-      <div class="setup">
-        <div>
-          <label for="categorySelect">Word category</label>
-          <select id="categorySelect">
-            <option value="all">All categories</option>
-            <option value="coast">Coast / Sea</option>
-            <option value="country">Countryside / Farming</option>
-            <option value="home">Home / Community</option>
-            <option value="town">Town / Services</option>
-            <option value="culture">Sport / Culture</option>
-            <option value="weather">Weather / Nature</option>
-          </select>
-        </div>
-        <div class="pill">Bank: <b id="bankCount">0</b> words</div>
-        <div class="pill">Keys: <b>Z</b> masc · <b>X</b> fem · arrows move</div>
-      </div>
-    </header>
-
-    <canvas id="game" width="1000" height="650"></canvas>
-
-    <div class="controls">
-      <button id="mascBtn">Masculine (Z)</button>
-      <button id="femBtn">Feminine (X)</button>
-      <button id="pauseBtn">Pause</button>
-      <button id="hintBtn">Hints: On</button>
-    </div>
-
-    <div class="minorControls">
-      <button id="restartBtn">Restart</button>
-      <button id="leftBtn">◀ Move</button>
-      <button id="rightBtn">Move ▶</button>
-    </div>
-
-    <div class="help">
-      Choose a category, then shoot the noun with its grammatical gender.
-      The bubbles are neutral, so they do not give away the answer.
-      Use <span class="kbd">Z</span> for masculine, <span class="kbd">X</span> for feminine,
-      and the left/right arrow keys to move.
-    </div>
-  </div>
-
-<script>
-(() => {
-  "use strict";
-
-  // ============================================================
-  // WORD BANKS
-  // m = masculine, f = feminine
-  // ============================================================
-
-  const WORD_BANKS = {
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#071e24"><title>Cosaint na bhFocal • Word defence</title>
+<style>
+:root{color-scheme:dark;--bg:#071b22;--panel:#102b32;--line:#315058;--text:#f0f5ed;--muted:#abc0bd;--mint:#b5e0ab;--gold:#efc979}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0,#244a46,transparent 65%),var(--bg);color:var(--text);font:16px/1.5 system-ui,Segoe UI,sans-serif}button,input,select{font:inherit}button,select,input{border:1px solid var(--line);border-radius:10px;padding:11px 14px;background:#15343b;color:var(--text)}button{cursor:pointer;min-height:46px;font-weight:650}button:hover{background:#254950}button:disabled{opacity:.5;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.primary{background:var(--mint);color:#153225;border-color:var(--mint)}.primary:hover{background:#d1edcb}.muted{color:var(--muted)}.eyebrow{text-transform:uppercase;letter-spacing:.19em;font-size:11px;color:var(--mint);font-weight:750}main{max-width:1180px;margin:auto;padding:28px 22px 60px}header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:24px}h1{font-size:clamp(27px,4vw,42px);font-weight:650;letter-spacing:-.04em;line-height:1.1;margin:7px 0}h2{font-size:24px;margin:5px 0 12px}p{margin:8px 0 14px}header p{margin:5px 0;color:var(--muted)}.badge{border:1px solid var(--line);border-radius:40px;padding:8px 14px;font-size:13px;white-space:nowrap}.layout{display:grid;grid-template-columns:260px 1fr;gap:20px}.panel{background:linear-gradient(135deg,#142f36,#0d262d);border:1px solid var(--line);border-radius:18px;padding:20px}.setup label{display:block;font-size:12px;font-weight:650;color:var(--muted);margin:15px 0 5px}.setup select{width:100%;font-size:14px}.setup .primary{width:100%;margin-top:20px}.small{font-size:13px}.stage{position:relative;overflow:hidden;border-radius:18px;border:1px solid var(--line);background:#081c28;height:390px}canvas{display:block;width:100%;height:100%;touch-action:pan-y}.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:22px;background:#061a23b8}.overlay>div{max-width:470px}.overlay h2{font-size:clamp(27px,4vw,39px);line-height:1.15;letter-spacing:-.035em}.overlay p{color:#d4e3df}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.stat{padding:9px 13px;border:1px solid var(--line);border-radius:12px;background:#0b242b}.stat span{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.stat b{font-size:20px;font-weight:650}.question{padding:15px 3px 8px}.question p{margin:0;color:var(--muted);font-size:13px}.question strong{font-size:21px}.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.answers.translation{grid-template-columns:repeat(3,1fr)}.answers button{min-height:62px;overflow-wrap:anywhere}.key{font-size:11px;opacity:.65;margin-right:8px}.feedback{border-left:3px solid var(--mint);padding:12px 16px;background:#14372f;border-radius:0 10px 10px 0;margin-top:12px;min-height:74px}.feedback.wrong{border-color:var(--gold);background:#3b3425}.feedback p{margin:4px 0}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.toolbar button{font-size:13px;padding:8px 14px}.toolbar .move{margin-left:auto}.note{padding:12px 0;color:var(--muted);font-size:12px}.summary{margin-top:18px}.summary ul{padding-left:22px}.wordlist{margin-top:24px}.list-head{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.list-head input{width:260px;max-width:100%}.table-wrap{overflow:auto;max-height:440px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--muted);position:sticky;top:0;background:#102b32}td:first-child{font-weight:650}details{margin-top:15px;color:var(--muted);font-size:13px}summary{cursor:pointer}.tag{display:inline-block;padding:2px 7px;border-radius:5px;background:#26424a;font-size:11px}footer{display:flex;justify-content:space-between;gap:20px;margin-top:20px;color:var(--muted);font-size:12px}footer button{font-size:12px;padding:6px 10px;min-height:36px}[hidden]{display:none!important}@media(max-width:760px){main{padding:18px 12px 35px}header{align-items:flex-start}.badge{display:none}.layout{grid-template-columns:1fr}.setup{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;padding:15px}.setup>h2,.setup>.eyebrow,.setup>.small,.setup>.primary{grid-column:1/-1}.setup h2{font-size:20px}.setup label{margin-top:10px}.stage{height:340px}.stat{padding:7px 9px}.stat b{font-size:18px}.answers.translation{grid-template-columns:1fr}.answers button{min-height:50px}.toolbar .move{margin-left:0}footer{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style></head><body><main>
+<header><div><div class="eyebrow">Irish vocabulary · Word defence</div><h1 lang="ga">Cosaint na bhFocal</h1><p>Protect the coast. Find the word. Learn a little more.</p></div><span class="badge">✦ <span id="totalWords"></span> words to explore</span></header>
+<div class="layout"><aside class="panel setup"><div class="eyebrow">Make it your own</div><h2>Your next round</h2>
+<div><label for="collection">Vocabulary</label><select id="collection"><option value="all">All vocabulary together</option><option value="original">Existing vocabulary</option><option value="new">New animals & farm</option></select></div>
+<div><label for="category">Category</label><select id="category"><option value="all">All categories</option><option value="coast">Coast / Sea</option><option value="country">Countryside / Farming</option><option value="home">Home / Community</option><option value="town">Town / Services</option><option value="culture">Sport / Culture</option><option value="weather">Weather / Nature</option><option value="animals">Animals & farm vocabulary</option></select></div>
+<div><label for="gender">Nouns</label><select id="gender"><option value="all">Masculine & feminine</option><option value="m">Masculine only</option><option value="f">Feminine only</option></select></div>
+<div><label for="mode">Learn</label><select id="mode"><option value="gender">Grammatical gender</option><option value="en-ga">English → Irish</option><option value="ga-en">Irish → English</option></select></div>
+<div><label for="pace">Play style</label><select id="pace"><option value="arcade">Coastal defence</option><option value="practice">Untimed practice</option></select></div>
+<div><label for="difficulty">Difficulty</label><select id="difficulty"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+<button class="primary" id="start">Start round →</button><p class="small muted" id="bankNote"></p><p class="small muted" id="savedNote"></p></aside>
+<section aria-label="Game"><div class="stats"><div class="stat"><span>Score</span><b id="score">0</b></div><div class="stat"><span>Round</span><b id="round">0 / 20</b></div><div class="stat"><span>Lives</span><b id="lives">5</b></div><div class="stat"><span>Best score</span><b id="best">0</b></div></div>
+<div class="stage"><canvas id="game" role="img" aria-label="Coastal word defence scene. Use the answer buttons below to play."></canvas><div class="overlay" id="overlay"><div><div class="eyebrow">A little Irish. A new adventure.</div><h2 id="overlayTitle">Words worth defending.</h2><p id="overlayText">Choose your vocabulary, then answer before each word reaches the coast. Prefer time to think? Choose untimed practice.</p><button class="primary" id="overlayAction">Start round →</button></div></div></div>
+<div class="question" aria-live="polite"><p id="questionLabel">Ready when you are</p><strong id="questionText">20 words. One small step forward.</strong></div><div id="answers" class="answers"></div>
+<div id="feedback" class="feedback" role="status" hidden></div><button id="next" class="primary" style="margin-top:12px" hidden>Next word →</button>
+<div class="toolbar"><button id="pause" disabled>Pause (P)</button><button id="restart" disabled>Restart</button><button id="finish" disabled>Finish round</button><button id="left" class="move" aria-label="Move left">← Move</button><button id="right" aria-label="Move right">Move →</button></div><div class="note">Gender: Z / X · Translation: 1 / 2 / 3 · Steer: ← / → · Next: Enter. Answering fires a guided shot. Mistake feedback stays until you continue.</div>
+<section id="summary" class="panel summary" hidden tabindex="-1"></section></section></div>
+<section class="panel wordlist"><div class="list-head"><div><div class="eyebrow">Keep exploring</div><h2>Your word book</h2></div><label><span class="small muted">Search Irish or English </span><input id="search" type="search" placeholder="Try bó, horse, coast…"></label></div><p class="small muted" id="listCount"></p><div class="table-wrap"><table><thead><tr><th scope="col">Irish</th><th scope="col">English</th><th scope="col">Gender</th><th scope="col">Collection</th></tr></thead><tbody id="wordRows"></tbody></table></div>
+<details><summary>About these words and their grammatical gender</summary><p>The new collection contains 59 entries: 36 masculine and 23 feminine. Its source documents overlap; each entry is imported once. Shared words belong to both collections. Masculine and feminine refer to grammar, not the sex of an animal.</p><p>Source spellings, meanings and genders are preserved, including regional terms. The original bank supplied genders but no English meanings; translation modes use entries with supplied translations. An em dash means no translation was supplied.</p><p>Review notes: “Stail” is supplied as feminine despite its English meaning “stallion”; it has not been changed based on biological sex. “Gadhar” and “Madra”, and “Beithíoch” and “Capall”, have overlapping translations and are treated as valid alternatives. Forms such as “Ruball”, “Trach”, “Faill muice” and plural “Putógaí” are retained for your review, not silently standardised. Original entries such as “ron” and “gréin” are also retained. No dictionary validation is claimed. Automatically generated adjective examples have been removed because the old rule did not account for every phrase or plural.</p></details></section>
+<footer><span>Progress stays in this browser. No account needed.<br><span id="storageNote"></span></span><button id="resetProgress">Reset saved progress</button></footer>
+</main><script>
+const OLD_BANKS = {
     coast: [
       ["bád","m"],["iasc","m"],["cladach","m"],["calafort","m"],["cuan","m"],["port","m"],["bá","f"],["trá","f"],
       ["tonn","f"],["taoide","f"],["farraige","f"],["muir","f"],["oileán","m"],["carraig","f"],["cloch","f"],["gaineamh","m"],
@@ -319,675 +99,408 @@
       ["breacadh an lae","m"],["lár an lae","m"],["deireadh seachtaine","m"],["mí na Bealtaine","m"],["mí an Mheithimh","m"]
     ]
   };
-
-  const CATEGORIES = Object.keys(WORD_BANKS);
-
-  function getBank(category){
-    if(category === "all"){
-      return CATEGORIES.flatMap(c => WORD_BANKS[c]);
-    }
-    return WORD_BANKS[category] || WORD_BANKS.home;
+const NEW_WORDS = [
+  {
+    "irish": "Adharc",
+    "english": "horn",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Asal",
+    "english": "donkey",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Banbh",
+    "english": "piglet",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Beithíoch",
+    "english": "horse",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Bó",
+    "english": "cow",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Bodóg",
+    "english": "heifer",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Bromach",
+    "english": "colt",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Buarach",
+    "english": "stall rope",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Buinneach",
+    "english": "diarrhoea (in cow)",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Bullán",
+    "english": "bullock",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Cacbó",
+    "english": "cowpat",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Capall",
+    "english": "Horse",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Cat",
+    "english": "cat",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Cearc",
+    "english": "hen",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Caora",
+    "english": "sheep",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Cleite",
+    "english": "feather",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Coileach",
+    "english": "cockerel",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Coileán",
+    "english": "puppy",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Cráin",
+    "english": "sow",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Cró na gcearc",
+    "english": "hen house",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Crúb",
+    "english": "hoof",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Faill muice",
+    "english": "pigsty",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Fionnadh",
+    "english": "fur",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Francach",
+    "english": "rat",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Gabhar",
+    "english": "goat",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Gadhar",
+    "english": "dog, mutt",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Gamhan",
+    "english": "calf",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Gandal",
+    "english": "gander",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Gé",
+    "english": "goose",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Gearrán",
+    "english": "gelding",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Gob",
+    "english": "beak",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Gog",
+    "english": "a child's name for an egg",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Góislín",
+    "english": "gosling",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Ladhar",
+    "english": "claw",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Láir",
+    "english": "Mare",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Lúchóg",
+    "english": "mouse",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Madra",
+    "english": "dog",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Meannán",
+    "english": "kid",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Muc",
+    "english": "pig",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Mútóg",
+    "english": "a flipper",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Nead",
+    "english": "nest",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Pardóg",
+    "english": "basket (on a donkey)",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Peata",
+    "english": "Pet",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Peillic",
+    "english": "Laying coop",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Pisín",
+    "english": "kitten",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Putógaí",
+    "english": "entrails",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Reithe",
+    "english": "Ram",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Ruball",
+    "english": "tail",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Sabhán",
+    "english": "a small thin pig",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Sciathán",
+    "english": "wing",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Searrach",
+    "english": "foal",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Smut",
+    "english": "snout",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Sprochaille",
+    "english": "wattle of a cockerel",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Stail",
+    "english": "Stallion",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "Tarbh",
+    "english": "bull",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Trach",
+    "english": "trough",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Uan",
+    "english": "lamb",
+    "gender": "m",
+    "category": "animals"
+  },
+  {
+    "irish": "Ubh",
+    "english": "egg",
+    "gender": "f",
+    "category": "animals"
+  },
+  {
+    "irish": "úth",
+    "english": "udder",
+    "gender": "m",
+    "category": "animals"
   }
-
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
-
-  const ui = {
-    score: document.getElementById("score"),
-    streak: document.getElementById("streak"),
-    lives: document.getElementById("lives"),
-    level: document.getElementById("level"),
-    bankCount: document.getElementById("bankCount"),
-    category: document.getElementById("categorySelect"),
-    hintBtn: document.getElementById("hintBtn"),
-    pauseBtn: document.getElementById("pauseBtn")
-  };
-
-  const state = {
-    score:0,
-    streak:0,
-    lives:5,
-    level:1,
-    paused:false,
-    gameOver:false,
-    hints:true,
-    category:"all",
-    bank:getBank("all"),
-    invaders:[],
-    shots:[],
-    nextSpawn:0,
-    time:0,
-    message:"Z = masculine, X = feminine",
-    messageUntil:2.5,
-    wave:0
-  };
-
-  const player = { x:500, y:580, w:108, h:20 };
-
-  let leftHeld = false;
-  let rightHeld = false;
-
-  function isMobile(){
-    return window.innerWidth < 600;
-  }
-
-  const config = {
-    maxInvaders(){ return isMobile() ? 5 : 9; },
-    bubbleRadius(){ return isMobile() ? 13 : 16; },
-    bubblePad(){ return isMobile() ? 8 : 10; },
-    wordFont(){ return isMobile() ? 14 : 16; },
-    fallSpeed(){ return 12 + state.level * 1.7; },
-    spawnDelay(){
-      const base = Math.max(1.35, 2.4 - state.level * 0.12);
-      const crowd = state.invaders.length / this.maxInvaders();
-      return base + Math.max(0, crowd - 0.55) * 2.2;
-    }
-  };
-
-  function resize(){
-    const ratio = window.devicePixelRatio || 1;
-    const cssW = canvas.clientWidth;
-    const cssH = cssW * 0.65;
-    canvas.width = Math.round(cssW * ratio);
-    canvas.height = Math.round(cssH * ratio);
-    ctx.setTransform(ratio,0,0,ratio,0,0);
-
-    if(player.x > W() - player.w - 10){
-      player.x = W() - player.w - 10;
-    }
-  }
-
-  function W(){ return canvas.clientWidth; }
-  function H(){ return canvas.clientHeight; }
-
-  window.addEventListener("resize", resize);
-  requestAnimationFrame(resize);
-
-  function updateHUD(){
-    ui.score.textContent = state.score;
-    ui.streak.textContent = state.streak;
-    ui.lives.textContent = state.lives;
-    ui.level.textContent = state.level;
-    ui.bankCount.textContent = state.bank.length;
-    ui.hintBtn.textContent = state.hints ? "Hints: On" : "Hints: Off";
-    ui.pauseBtn.textContent = state.paused ? "Resume" : "Pause";
-  }
-
-  function showMessage(text, duration=1.25){
-    state.message = text;
-    state.messageUntil = state.time + duration;
-  }
-
-  function resetGame(){
-    state.score = 0;
-    state.streak = 0;
-    state.lives = 5;
-    state.level = 1;
-    state.paused = false;
-    state.gameOver = false;
-    state.invaders = [];
-    state.shots = [];
-    state.nextSpawn = 0.8;
-    state.time = 0;
-    player.x = W()/2 - player.w/2;
-    showMessage("Z = masculine, X = feminine", 2.4);
-    updateHUD();
-  }
-
-  function setCategory(cat){
-    state.category = cat;
-    state.bank = getBank(cat);
-    state.invaders = [];
-    state.shots = [];
-    state.nextSpawn = state.time + 0.6;
-    showMessage("Category changed", 1);
-    updateHUD();
-  }
-
-  ui.category.addEventListener("change", e => setCategory(e.target.value));
-
-  function rand(arr){
-    return arr[Math.floor(Math.random()*arr.length)];
-  }
-
-  function lenite(word){
-    if(!word) return word;
-    const first = word[0].toLowerCase();
-    if(word[1] && word[1].toLowerCase() === "h") return word;
-    return "bcdfgmpt".includes(first) ? word[0] + "h" + word.slice(1) : word;
-  }
-
-  function phrase(word, gender){
-    const adj = rand(["mór","beag","fuar","fliuch","garbh","ciúin"]);
-    return gender === "f" ? `${word} ${lenite(adj)}` : `${word} ${adj}`;
-  }
-
-  function spawnX(){
-    const r = config.bubbleRadius() + config.bubblePad();
-    const min = r + 12;
-    const max = W() - r - 12;
-
-    for(let tries=0; tries<12; tries++){
-      const x = min + Math.random()*(max-min);
-      let clear = true;
-
-     for(const inv of state.invaders){
-  if(!inv.hit && inv.y > H() - 36){
-    inv.hit = true;
-
-    // Missing a word is a small penalty, not a lost life.
-    state.streak = 0;
-    state.score = Math.max(0, state.score - 5);
-    showMessage(`Missed: ${inv.word}`, 0.9);
-    updateHUD();
-  }
-}
-
-      if(clear) return x;
-    }
-
-    return min + Math.random()*(max-min);
-  }
-
-  function spawn(){
-    if(state.invaders.length >= config.maxInvaders()) return;
-
-    const item = rand(state.bank);
-    const r = config.bubbleRadius();
-
-    state.invaders.push({
-      word:item[0],
-      gender:item[1],
-      x:spawnX(),
-      y:-30,
-      r,
-      speed:config.fallSpeed(),
-      hit:false
-    });
-  }
-
-  function shoot(gender){
-    if(state.paused || state.gameOver) return;
-
-    state.shots.push({
-      x:player.x + player.w/2,
-      y:player.y - 6,
-      r:6,
-      speed:560,
-      gender
-    });
-  }
-
-  function damage(text){
-    state.streak = 0;
-    state.lives--;
-    showMessage(text, 1.0);
-
-    if(state.lives <= 0){
-      state.gameOver = true;
-      showMessage("Game Over — press Restart", 999);
-    }
-
-    updateHUD();
-  }
-
-function hit(inv, shot){
-  inv.hit = true;
-
-  const correct = inv.gender === shot.gender;
-  const fullGender = inv.gender === "m" ? "masculine" : "feminine";
-  const shortGender = inv.gender === "m" ? "masc" : "fem";
-  const hintText = state.hints ? `\nExample: ${phrase(inv.word, inv.gender)}` : "";
-
-  if(correct){
-    state.streak++;
-    state.score += 10 + Math.min(30, state.streak);
-
-    showMessage(
-      `Correct!\n${inv.word} is ${fullGender}${hintText}`,
-      2.2
-    );
-  }else{
-    state.streak = 0;
-    state.score = Math.max(0, state.score - 10);
-    state.lives--;
-
-    showMessage(
-      `Wrong gender!\n${inv.word} is ${fullGender}${hintText}`,
-      2.6
-    );
-
-    if(state.lives <= 0){
-      state.gameOver = true;
-      showMessage(
-        `Game Over\n${inv.word} was ${shortGender}`,
-        999
-      );
-    }
-  }
-
-  const newLevel = 1 + Math.floor(state.score / 240);
-
-  if(newLevel !== state.level){
-    state.level = newLevel;
-  }
-
-  updateHUD();
-}
-
-  function drawBackground(dt){
-    state.wave += dt * .75;
-
-    const w = W();
-    const h = H();
-    const horizon = h * .48;
-
-    const sky = ctx.createLinearGradient(0,0,0,horizon);
-    sky.addColorStop(0,"#07101d");
-    sky.addColorStop(1,"#12243b");
-    ctx.fillStyle = sky;
-    ctx.fillRect(0,0,w,horizon);
-
-    const sea = ctx.createLinearGradient(0,horizon,0,h);
-    sea.addColorStop(0,"#0d3147");
-    sea.addColorStop(1,"#06131f");
-    ctx.fillStyle = sea;
-    ctx.fillRect(0,horizon,w,h-horizon);
-
-    ctx.strokeStyle = "rgba(180,220,255,.20)";
-    ctx.lineWidth = 1;
-
-    for(let i=0;i<8;i++){
-      const y = horizon + 18 + i*30;
-      ctx.beginPath();
-
-      for(let x=0;x<=w;x+=22){
-        ctx.lineTo(x, y + Math.sin(x/85 + state.wave + i*.6) * 2.5);
-      }
-
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = "rgba(12,24,24,.58)";
-    ctx.beginPath();
-    ctx.moveTo(0,horizon);
-    ctx.quadraticCurveTo(w*.20,horizon-60,w*.40,horizon-8);
-    ctx.quadraticCurveTo(w*.58,horizon+22,w*.75,horizon-28);
-    ctx.quadraticCurveTo(w*.90,horizon-72,w,horizon-12);
-    ctx.lineTo(w,horizon+60);
-    ctx.lineTo(0,horizon+60);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = "rgba(5,9,12,.88)";
-    ctx.beginPath();
-    ctx.moveTo(0,horizon+46);
-    ctx.lineTo(w*.20,horizon+25);
-    ctx.lineTo(w*.34,horizon+42);
-    ctx.lineTo(w*.48,horizon+26);
-    ctx.lineTo(w*.64,horizon+48);
-    ctx.lineTo(w*.80,horizon+30);
-    ctx.lineTo(w,horizon+45);
-    ctx.lineTo(w,h);
-    ctx.lineTo(0,h);
-    ctx.closePath();
-    ctx.fill();
-
-    const lx = w*.87;
-    const ly = horizon+32;
-
-    ctx.fillStyle = "rgba(8,8,10,.95)";
-    ctx.beginPath();
-    ctx.moveTo(lx-10,ly);
-    ctx.lineTo(lx+10,ly);
-    ctx.lineTo(lx+6,ly-52);
-    ctx.lineTo(lx-6,ly-52);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillRect(lx-9,ly-60,18,9);
-
-    ctx.fillStyle = "rgba(255,240,180,.12)";
-    ctx.beginPath();
-    ctx.arc(lx,ly-55,18,0,Math.PI*2);
-    ctx.fill();
-  }
-
-  function roundRect(x,y,w,h,r){
-    ctx.beginPath();
-    ctx.moveTo(x+r,y);
-    ctx.arcTo(x+w,y,x+w,y+h,r);
-    ctx.arcTo(x+w,y+h,x,y+h,r);
-    ctx.arcTo(x,y+h,x,y,r);
-    ctx.arcTo(x,y,x+w,y,r);
-    ctx.closePath();
-  }
-
-  function drawBubble(inv){
-    const pad = config.bubblePad();
-
-    ctx.save();
-    ctx.translate(inv.x, inv.y);
-
-    ctx.beginPath();
-    ctx.arc(0,0,inv.r+pad,0,Math.PI*2);
-    ctx.fillStyle = "rgba(235,245,255,.105)";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(235,245,255,.28)";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.font = `${config.wordFont()}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(248,251,255,.96)";
-
-    const maxWidth = isMobile() ? 92 : 135;
-    ctx.fillText(inv.word,0,0,maxWidth);
-
-    ctx.restore();
-  }
-
-  function drawPlayer(){
-    player.y = H() - 58;
-    player.x = Math.max(10, Math.min(W()-player.w-10, player.x));
-
-    ctx.save();
-    ctx.translate(player.x, player.y);
-
-    ctx.fillStyle = "rgba(255,255,255,.18)";
-    ctx.fillRect(0,0,player.w,20);
-
-    ctx.fillStyle = "rgba(115,180,255,.45)";
-    ctx.fillRect(10,-14,38,14);
-
-    ctx.fillStyle = "rgba(255,145,220,.42)";
-    ctx.fillRect(60,-14,38,14);
-
-    ctx.font = "12px ui-monospace,Consolas,monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#eaf2ff";
-    ctx.fillText("Z",29,-7);
-    ctx.fillText("X",79,-7);
-
-    ctx.restore();
-  }
-
-  function drawShot(s){
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle = s.gender === "m" ? "rgba(115,180,255,.95)" : "rgba(255,145,220,.95)";
-    ctx.fill();
-  }
-
-function drawMessage(){
-  if(state.time > state.messageUntil) return;
-
-  const lines = String(state.message).split("\n");
-
-  ctx.save();
-
-  const panelW = Math.min(W() - 20, isMobile() ? W() - 16 : 560);
-  const panelX = W()/2 - panelW/2;
-  const panelY = 16;
-
-  const titleSize = isMobile() ? 18 : 22;
-  const bodySize = isMobile() ? 15 : 18;
-  const lineGap = isMobile() ? 24 : 29;
-  const paddingTop = isMobile() ? 14 : 17;
-  const paddingBottom = isMobile() ? 14 : 17;
-
-  const panelH = paddingTop + paddingBottom + titleSize + Math.max(0, lines.length - 1) * lineGap;
-
-  ctx.fillStyle = "rgba(0,0,0,.72)";
-  ctx.strokeStyle = "rgba(255,255,255,.30)";
-  ctx.lineWidth = 2;
-
-  roundRect(panelX, panelY, panelW, panelH, 16);
-  ctx.fill();
-  ctx.stroke();
-
-  // subtle inner glow
-  ctx.strokeStyle = "rgba(180,220,255,.18)";
-  ctx.lineWidth = 1;
-  roundRect(panelX + 4, panelY + 4, panelW - 8, panelH - 8, 13);
-  ctx.stroke();
-
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  // First line: main result
-  ctx.font = `800 ${titleSize}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText(lines[0], W()/2, panelY + paddingTop + titleSize/2);
-
-  // Remaining lines: explanation / example
-  ctx.font = `650 ${bodySize}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
-  ctx.fillStyle = "#dceaff";
-
-  for(let i = 1; i < lines.length; i++){
-    let text = lines[i];
-
-    // avoid overflow on phones
-    if(isMobile() && text.length > 44){
-      text = text.slice(0, 42) + "…";
-    }
-
-    ctx.fillText(
-      text,
-      W()/2,
-      panelY + paddingTop + titleSize + i * lineGap
-    );
-  }
-
-  ctx.restore();
-}
-
-  // ============================================================
-  // BUTTON CONTROLS
-  // ============================================================
-
-  document.getElementById("mascBtn").addEventListener("click", () => shoot("m"));
-  document.getElementById("femBtn").addEventListener("click", () => shoot("f"));
-
-  document.getElementById("pauseBtn").addEventListener("click", () => {
-    state.paused = !state.paused;
-    updateHUD();
-  });
-
-  document.getElementById("restartBtn").addEventListener("click", () => {
-    resetGame();
-  });
-
-  document.getElementById("hintBtn").addEventListener("click", () => {
-    state.hints = !state.hints;
-    updateHUD();
-  });
-
-  function movePlayerBy(amount){
-    player.x += amount;
-    player.x = Math.max(10, Math.min(W()-player.w-10, player.x));
-  }
-
-  const leftBtn = document.getElementById("leftBtn");
-  const rightBtn = document.getElementById("rightBtn");
-
-  leftBtn.addEventListener("click", () => movePlayerBy(-45));
-  rightBtn.addEventListener("click", () => movePlayerBy(45));
-
-  leftBtn.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    leftHeld = true;
-  });
-
-  rightBtn.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    rightHeld = true;
-  });
-
-  window.addEventListener("pointerup", () => {
-    leftHeld = false;
-    rightHeld = false;
-  });
-
-  window.addEventListener("pointercancel", () => {
-    leftHeld = false;
-    rightHeld = false;
-  });
-
-  // ============================================================
-  // KEYBOARD CONTROLS
-  // ============================================================
-
-  window.addEventListener("keydown", e => {
-    const k = e.key.toLowerCase();
-
-    if(k === "z") shoot("m");
-    if(k === "x") shoot("f");
-
-    if(e.key === "ArrowLeft") leftHeld = true;
-    if(e.key === "ArrowRight") rightHeld = true;
-
-    if(k === "p"){
-      state.paused = !state.paused;
-      updateHUD();
-    }
-
-    if(k === "r") resetGame();
-
-    if(k === "h"){
-      state.hints = !state.hints;
-      updateHUD();
-    }
-  });
-
-  window.addEventListener("keyup", e => {
-    if(e.key === "ArrowLeft") leftHeld = false;
-    if(e.key === "ArrowRight") rightHeld = false;
-  });
-
-  // Drag movement on canvas
-  canvas.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    canvas.setPointerCapture(e.pointerId);
-    movePlayerTo(e.clientX);
-  });
-
-  canvas.addEventListener("pointermove", e => {
-    if(e.buttons) movePlayerTo(e.clientX);
-  });
-
-  function movePlayerTo(clientX){
-    const rect = canvas.getBoundingClientRect();
-    player.x = clientX - rect.left - player.w/2;
-  }
-
-  function update(dt){
-    if(state.paused || state.gameOver) return;
-
-    state.time += dt;
-
-    if(leftHeld) player.x -= 340 * dt;
-    if(rightHeld) player.x += 340 * dt;
-
-    player.x = Math.max(10, Math.min(W()-player.w-10, player.x));
-
-    if(state.time >= state.nextSpawn){
-      if(state.invaders.length < config.maxInvaders()){
-        spawn();
-      }
-
-      state.nextSpawn = state.time + config.spawnDelay() * (0.85 + Math.random()*0.35);
-    }
-
-    for(const inv of state.invaders){
-      inv.y += inv.speed * dt;
-    }
-
-    for(const shot of state.shots){
-      shot.y -= shot.speed * dt;
-    }
-
-    for(const inv of state.invaders){
-      if(inv.hit) continue;
-
-      for(const shot of state.shots){
-        if(shot.dead) continue;
-
-        const rr = inv.r + config.bubblePad() + shot.r;
-        const dx = inv.x - shot.x;
-        const dy = inv.y - shot.y;
-
-        if(dx*dx + dy*dy <= rr*rr){
-          shot.dead = true;
-          hit(inv,shot);
-          break;
-        }
-      }
-    }
-
-    for(const inv of state.invaders){
-      if(!inv.hit && inv.y > H() - 36){
-        inv.hit = true;
-        damage(`Missed: ${inv.word}`);
-      }
-    }
-
-    state.invaders = state.invaders.filter(i => !i.hit && i.y < H()+70);
-    state.shots = state.shots.filter(s => !s.dead && s.y > -70);
-  }
-
-  function draw(dt){
-    ctx.clearRect(0,0,W(),H());
-
-    drawBackground(dt);
-
-    ctx.strokeStyle = "rgba(255,255,255,.2)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0,H()-26);
-    ctx.lineTo(W(),H()-26);
-    ctx.stroke();
-
-    for(const inv of state.invaders) drawBubble(inv);
-    for(const shot of state.shots) drawShot(shot);
-
-    drawPlayer();
-    drawMessage();
-
-    if(state.paused || state.gameOver){
-      ctx.fillStyle = "rgba(0,0,0,.40)";
-      ctx.fillRect(0,0,W(),H());
-
-      ctx.fillStyle = "#edf5ff";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = "26px system-ui";
-      ctx.fillText(state.gameOver ? "Game Over" : "Paused", W()/2, H()/2 - 10);
-
-      ctx.font = "15px system-ui";
-      ctx.fillText(state.gameOver ? "Tap Restart" : "Tap Pause to resume", W()/2, H()/2 + 24);
-    }
-  }
-
-  let last = performance.now();
-
-  function loop(now){
-    const dt = Math.min(0.033, (now-last)/1000);
-    last = now;
-
-    update(dt);
-    draw(dt);
-
-    requestAnimationFrame(loop);
-  }
-
-  setCategory("all");
-  resetGame();
-  updateHUD();
-  requestAnimationFrame(loop);
-})();
-</script>
-</body>
-</html>
+];
+'use strict';
+const norm=s=>s.normalize('NFC').trim().toLocaleLowerCase('ga').replace(/\s+/g,' ');
+const categories={coast:'Coast / Sea',country:'Countryside / Farming',home:'Home / Community',town:'Town / Services',culture:'Sport / Culture',weather:'Weather / Nature',animals:'Animals & farm'};
+const wordsMap=new Map();
+for(const [category,rows] of Object.entries(OLD_BANKS))for(const [irish,gender] of rows){const id=norm(irish)+'|'+gender;if(!wordsMap.has(id))wordsMap.set(id,{id,irish,gender,english:'',categories:[],sources:['original']});const w=wordsMap.get(id);if(!w.categories.includes(category))w.categories.push(category);}
+for(const item of NEW_WORDS){const id=norm(item.irish)+'|'+item.gender;let w=wordsMap.get(id);if(!w){w={id,irish:item.irish,gender:item.gender,english:item.english,categories:[],sources:[]};wordsMap.set(id,w);}w.english=item.english;if(!w.sources.includes('new'))w.sources.push('new');if(!w.categories.includes('animals'))w.categories.push('animals');}
+const WORDS=[...wordsMap.values()];
+const $=id=>document.getElementById(id);
+const controls=['collection','category','gender','mode','pace','difficulty'];
+const STORAGE='cosaint-v2-progress';
+let persistent=true;
+function readProgress(){try{const p=JSON.parse(localStorage.getItem(STORAGE)||'{}');return {words:p.words&&typeof p.words==='object'?p.words:{},bests:p.bests&&typeof p.bests==='object'?p.bests:{},settings:p.settings||{}};}catch{persistent=false;return {words:{},bests:{},settings:{}};}}
+let progress=readProgress();
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify(progress));}catch{persistent=false;}$('storageNote').textContent=persistent?'':'Browser storage is unavailable; you can still play, but progress may not be saved.';}
+for(const id of controls){const v=progress.settings[id];if([...$(id).options].some(o=>o.value===v))$(id).value=v;}
+function settings(){return Object.fromEntries(controls.map(id=>[id,$(id).value]));}
+function filtered(s,translate=true){return WORDS.filter(w=>(s.collection==='all'||w.sources.includes(s.collection))&&(s.category==='all'||w.categories.includes(s.category))&&(s.gender==='all'||w.gender===s.gender)&&(!translate||s.mode==='gender'||w.english));}
+function shuffle(xs){return [...xs].sort(()=>Math.random()-.5);}
+function meanings(w){return w.english.split(',').map(norm);}
+function equivalent(a,b){return meanings(a).some(x=>meanings(b).includes(x));}
+function buildQuestion(w,pool,mode){if(mode==='gender')return {word:w,prompt:w.irish,choices:[{label:'Masculine',value:'m'},{label:'Feminine',value:'f'}],correct:w.gender};const label=x=>mode==='en-ga'?x.irish:x.english;const distractors=[];const seen=new Set([norm(label(w))]);for(const candidate of shuffle(pool)){if(equivalent(w,candidate)||norm(w.irish)===norm(candidate.irish)||seen.has(norm(label(candidate))))continue;seen.add(norm(label(candidate)));distractors.push(candidate);if(distractors.length===2)break;}return {word:w,prompt:mode==='en-ga'?w.english:w.irish,choices:shuffle([w,...distractors]).map(x=>({label:label(x),value:x.id})),correct:w.id};}
+function chooseWord(pool,recent){let options=pool.filter(w=>!recent.slice(-Math.min(5,pool.length-1)).includes(w.id));if(!options.length)options=pool;const weights=options.map(w=>1+Math.min(5,Number(progress.words[w.id]?.wrong)||0)*2);let ticket=Math.random()*weights.reduce((a,b)=>a+b,0);return options.find((w,i)=>(ticket-=weights[i])<0)||options[0];}
+let state={phase:'idle',score:0,streak:0,lives:5,answered:0,correct:0,errors:[],recent:[],y:45,x:.5,ship:.5,shot:null};
+let held=0,lastTime=0,width=800,height=390;
+const canvas=$('game'),ctx=canvas.getContext('2d');
+function resize(){width=canvas.clientWidth;height=canvas.clientHeight;const dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=width*dpr;canvas.height=height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+function bestKey(s){return [s.collection,s.category,s.gender,s.mode,s.pace,s.difficulty].join('|');}
+function hud(){const s=state.settings||settings();$('score').textContent=state.score;$('round').textContent=`${state.answered} / 20`;$('lives').textContent=s.pace==='practice'?'∞':state.lives;$('best').textContent=progress.bests[bestKey(s)]||0;$('pause').disabled=!['playing','paused'].includes(state.phase);$('pause').textContent=state.phase==='paused'?'Resume (P)':'Pause (P)';$('finish').disabled=['idle','ended'].includes(state.phase);$('restart').disabled=state.phase==='idle';}
+function showOverlay(title,text,button){$('overlay').hidden=false;$('overlayTitle').textContent=title;$('overlayText').textContent=text;$('overlayAction').textContent=button;}
+function selectionChanged(){if(!['idle','ended'].includes(state.phase))return;const s=settings(),pool=filtered(s),raw=filtered(s,false);progress.settings=s;save();$('start').disabled=pool.length===0;$('overlayAction').disabled=pool.length===0;$('bankNote').textContent=`${pool.length} words ready. `+(s.mode!=='gender'?`${raw.length-pool.length} without supplied translations are excluded. `:'')+(pool.length===0?'Choose another category or collection.':'Rounds contain 20 questions; small sets repeat.');$('savedNote').textContent=`${Object.keys(progress.words).length} words practised in this browser.`;hud();renderWords();}
+function renderWords(){const s=settings(),needle=norm($('search').value);const pool=filtered(s,false).filter(w=>norm([w.irish,w.english,...w.categories.map(c=>categories[c])].join(' ')).includes(needle));$('listCount').textContent=`${pool.length} words in the selected collection and filters. Search ignores letter case; fadas are preserved.`;$('wordRows').replaceChildren();for(const w of pool.sort((a,b)=>a.irish.localeCompare(b.irish,'ga'))){const row=document.createElement('tr');for(const [i,text] of [w.irish,w.english||'—',w.gender==='m'?'Masculine':'Feminine',w.sources.length===2?'Existing + new':w.sources[0]==='new'?'New animals & farm':'Existing'].entries()){const td=document.createElement('td');td.textContent=text;if(i===0)td.lang='ga';row.append(td);}$('wordRows').append(row);}}
+function lock(locked){controls.forEach(id=>$(id).disabled=locked);$('start').disabled=locked;}
+function startRound(onlyMistakes){const s=settings();let pool=filtered(s);if(onlyMistakes){const ids=new Set(state.errors.map(e=>e.word.id));pool=pool.filter(w=>ids.has(w.id));s.pace='practice';}if(!pool.length)return;state={phase:'playing',settings:s,pool,score:0,streak:0,lives:5,answered:0,correct:0,errors:[],recent:[],y:45,x:.5,ship:.5,shot:null};$('summary').hidden=true;lock(true);$('overlay').hidden=true;nextQuestion();}
+function nextQuestion(){if(state.answered>=20||(state.lives<=0&&state.settings.pace!=='practice')){endRound();return;}state.phase='playing';state.shot=null;state.y=42;state.x=.25+Math.random()*.5;const w=chooseWord(state.pool,state.recent);state.recent.push(w.id);state.q=buildQuestion(w,state.pool,state.settings.mode);$('questionLabel').textContent=state.settings.mode==='gender'?'What is its grammatical gender?':state.settings.mode==='en-ga'?'Choose the Irish translation':'Choose the English meaning';$('questionText').textContent=state.q.prompt;$('questionText').lang=state.settings.mode==='en-ga'?'en':'ga';$('feedback').hidden=true;$('next').hidden=true;$('answers').className='answers'+(state.settings.mode==='gender'?'':' translation');$('answers').replaceChildren();state.q.choices.forEach((choice,i)=>{const b=document.createElement('button');const k=document.createElement('span');k.className='key';k.textContent=state.settings.mode==='gender'?(i===0?'Z':'X'):String(i+1);b.append(k,document.createTextNode(choice.label));b.addEventListener('click',()=>answer(choice.value));$('answers').append(b);});hud();}
+function answer(value){if(state.phase!=='playing')return;state.phase='feedback';const q=state.q,ok=value===q.correct,missed=value===null;state.answered++;state.correct+=Number(ok);state.streak=ok?state.streak+1:0;state.score=ok?state.score+10+Math.min(30,state.streak):Math.max(0,state.score-5);if(!ok&&state.settings.pace!=='practice')state.lives--;if(!ok)state.errors.push({word:q.word,missed});const p=progress.words[q.word.id]||{correct:0,wrong:0};p[ok?'correct':'wrong']++;progress.words[q.word.id]=p;const key=bestKey(state.settings);progress.bests[key]=Math.max(progress.bests[key]||0,state.score);save();state.shot=missed?null:{t:0,from:state.ship};for(const b of $('answers').children)b.disabled=true;const f=$('feedback');f.hidden=false;f.className='feedback'+(ok?'':' wrong');f.replaceChildren();const title=document.createElement('strong');title.textContent=ok?'Correct — well done.':missed?'The word reached the coast.':'Let’s learn this one.';const explanation=document.createElement('p');explanation.textContent=`${q.word.irish}${q.word.english?' — '+q.word.english:''} · ${q.word.gender==='m'?'masculine':'feminine'}.`;f.append(title,explanation);if(state.settings.mode==='en-ga'){const alternatives=state.pool.filter(w=>w.id!==q.word.id&&equivalent(w,q.word));if(alternatives.length){const extra=document.createElement('p');extra.textContent='Also accepted for this meaning: '+alternatives.map(w=>w.irish).join(', ')+'.';f.append(extra);}}$('next').hidden=false;$('next').textContent=state.answered>=20||state.lives<=0?'See round summary →':'Next word →';$('next').focus({preventScroll:true});hud();}
+function endRound(){state.phase='ended';held=0;lock(false);$('answers').replaceChildren();$('next').hidden=true;$('feedback').hidden=true;showOverlay('A little more learned.',`${state.correct} correct out of ${state.answered} answered. ${persistent?'Your progress is saved in this browser.':'Progress could not be saved in this browser.'}`,'Play another round →');$('questionLabel').textContent='Round complete';$('questionText').textContent='Review your words below, or choose a new round.';const panel=$('summary');panel.hidden=false;panel.replaceChildren();const h=document.createElement('h2');h.textContent='Your round';const p=document.createElement('p');p.textContent=`${state.score} points · ${state.answered?Math.round(100*state.correct/state.answered):0}% accuracy · ${state.correct}/${state.answered} correct`;panel.append(h,p);const unique=[...new Map(state.errors.map(e=>[e.word.id,e.word])).values()];if(unique.length){const intro=document.createElement('p');intro.textContent='A few words to revisit:';const ul=document.createElement('ul');for(const w of unique){const li=document.createElement('li');li.textContent=`${w.irish}${w.english?' — '+w.english:''} (${w.gender==='m'?'masculine':'feminine'})`;ul.append(li);}const b=document.createElement('button');b.className='primary';b.textContent='Practise these words without a timer';b.onclick=()=>startRound(true);panel.append(intro,ul,b);}else{const p=document.createElement('p');p.textContent=state.answered?'No missed words in this round. Keep going!':'No answers recorded yet.';panel.append(p);}selectionChanged();panel.focus({preventScroll:true});}
+function pause(){if(state.phase==='playing'){state.phase='paused';held=0;showOverlay('Take your time.','Your round is paused. Nothing moves until you resume.','Resume round →');}else if(state.phase==='paused'){state.phase='playing';$('overlay').hidden=true;}hud();}
+function draw(time,dt){ctx.clearRect(0,0,width,height);const sky=ctx.createLinearGradient(0,0,0,height);sky.addColorStop(0,'#10283b');sky.addColorStop(1,'#174b51');ctx.fillStyle=sky;ctx.fillRect(0,0,width,height);ctx.fillStyle='#dceacb';ctx.beginPath();ctx.arc(width*.84,58,19,0,Math.PI*2);ctx.fill();ctx.fillStyle='#153b3b';ctx.beginPath();ctx.moveTo(0,height*.62);ctx.quadraticCurveTo(width*.15,height*.36,width*.4,height*.65);ctx.quadraticCurveTo(width*.7,height*.46,width,height*.63);ctx.lineTo(width,height);ctx.lineTo(0,height);ctx.fill();ctx.fillStyle='#0b2932';ctx.fillRect(0,height*.7,width,height*.3);const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;ctx.strokeStyle='#b5e0ab25';for(let i=0;i<6;i++){ctx.beginPath();for(let x=0;x<=width;x+=20){const y=height*.73+i*19+Math.sin(x/65+(reduce?0:time/1900)+i)*3; x?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}ctx.fillStyle='#071c23';ctx.fillRect(width*.91,height*.55,12,height*.2);ctx.fillStyle='#efc979';ctx.fillRect(width*.91-2,height*.55-7,16,6);
+const active=['playing','feedback','paused'].includes(state.phase);if(active&&state.q){ctx.font='600 18px system-ui';const text=state.q.prompt;const max=width-28;const lines=[];let line='';for(const part of text.split(' ')){if(ctx.measureText(line+' '+part).width>max-26&&line){lines.push(line);line=part;}else line+=(line?' ':'')+part;}if(line)lines.push(line);const cardWidth=Math.min(max,Math.max(130,...lines.map(t=>ctx.measureText(t).width+32)));const cardHeight=lines.length*24+16;const cx=Math.max(cardWidth/2+10,Math.min(width-cardWidth/2-10,state.x*width));state.targetX=cx;ctx.fillStyle='#102832';ctx.strokeStyle='#9ec8bf';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(cx-cardWidth/2,state.y,cardWidth,cardHeight,12);ctx.fill();ctx.stroke();ctx.fillStyle='#f3f5ea';ctx.textAlign='center';ctx.textBaseline='middle';lines.forEach((t,i)=>ctx.fillText(t,cx,state.y+20+i*24,max-20));if(state.settings.pace==='arcade'){ctx.fillStyle='#efc979';ctx.fillRect(14,height-39,(width-28)*Math.max(0,1-(state.y-42)/(height-142)),3);}if(state.shot){state.shot.t=Math.min(1,state.shot.t+dt*3);const t=state.shot.t;ctx.strokeStyle='#c9edb1';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(state.shot.from*width,height-45);ctx.lineTo(state.shot.from*width+(cx-state.shot.from*width)*t,height-45+(state.y+22-height+45)*t);ctx.stroke();}}
+ctx.save();ctx.translate(state.ship*width,height-27);ctx.fillStyle='#b5e0ab';ctx.beginPath();ctx.moveTo(0,-17);ctx.lineTo(21,8);ctx.lineTo(0,3);ctx.lineTo(-21,8);ctx.closePath();ctx.fill();ctx.restore();}
+function frame(time){const dt=Math.min(.04,(time-(lastTime||time))/1000);lastTime=time;if(state.phase==='playing'){state.ship=Math.max(.04,Math.min(.96,state.ship+held*dt*.7));if(state.settings.pace==='arcade'){const seconds={beginner:24,intermediate:16,advanced:10}[state.settings.difficulty];state.y+=(height-142)*dt/seconds;if(state.y>=height-100)answer(null);}}draw(time,dt);requestAnimationFrame(frame);}
+$('start').onclick=()=>startRound(false);$('overlayAction').onclick=()=>state.phase==='paused'?pause():startRound(false);$('next').onclick=nextQuestion;$('pause').onclick=pause;$('finish').onclick=endRound;$('restart').onclick=()=>{if(confirm('Restart this round? Completed answers remain in your saved progress.'))startRound(false);};
+for(const id of controls)$(id).onchange=selectionChanged;$('search').oninput=renderWords;
+for(const [id,direction] of [['left',-1],['right',1]]){$(id).onpointerdown=e=>{if(state.phase!=='playing')return;e.preventDefault();held=direction;$(id).setPointerCapture(e.pointerId);};$(id).onpointerup=$(id).onpointercancel=()=>held=0;$(id).onclick=()=>{if(state.phase==='playing')state.ship=Math.max(.04,Math.min(.96,state.ship+direction*.05));};}
+window.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();if(['arrowleft','arrowright','z','x','p','1','2','3'].includes(k))e.preventDefault();if(e.repeat)return;if(k==='p')pause();if(state.phase==='feedback'&&k==='enter'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextQuestion();}if(state.phase!=='playing')return;if(k==='arrowleft')held=-1;if(k==='arrowright')held=1;const i=state.settings.mode==='gender'?({z:0,x:1})[k]:({'1':0,'2':1,'3':2})[k];if(i!==undefined&&state.q.choices[i])answer(state.q.choices[i].value);});
+window.addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight'].includes(e.key))held=0;});window.addEventListener('blur',()=>{held=0;if(state.phase==='playing')pause();});document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='playing')pause();});window.addEventListener('resize',resize);
+$('resetProgress').onclick=()=>{if(!confirm('Delete all saved word progress and best scores in this browser?'))return;progress={words:{},bests:{},settings:settings()};save();hud();$('savedNote').textContent='Saved progress cleared.';};
+$('totalWords').textContent=WORDS.length;resize();selectionChanged();requestAnimationFrame(frame);
+</script></body></html>
